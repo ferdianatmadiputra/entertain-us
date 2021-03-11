@@ -1,7 +1,7 @@
 const express = require('express')
 const { connect } = require('./config/mongodb.js')
 const app = express()
-const port = 3000
+const port = 3002
 const index = require('./routes/index.js')
 
 app.use(express.urlencoded({extended:true}))

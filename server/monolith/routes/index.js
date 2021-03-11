@@ -6,3 +6,5 @@ const seriesRoute = require('./seriesRoute')
 
 router.use('/movies', movieRoute)
 router.use('/series', seriesRoute)
+
+module.exports = router
