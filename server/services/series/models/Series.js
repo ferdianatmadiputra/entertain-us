@@ -1,4 +1,5 @@
 const { getDatabase } = require('../config/mongodb')
+const { ObjectId } = require('bson')
 
 module.exports = class Series {
   static find() {
@@ -9,19 +10,18 @@ module.exports = class Series {
     return getDatabase().collection('series').insertOne(series)
   }
 
-  static update (payload) {
-    let content = payload.content
-    let id = payload.id
-    const filter = { _id: id };
-    // update the value of the 'z' field to 42
+  static update (series) {
+    let content = series.content
+    let id = series.id
+    const filter = { _id: ObjectId(id) };
     const updateDocument = {
-      $set: content, // object type 
+      $set: content,
     };
     return getDatabase().collection('series').updateOne(filter, updateDocument);
   }
 
-  static delete (id) {
-    const filter = { _id: id };
+  static destroy (id) {
+    const filter = { _id: ObjectId(id) };
     return getDatabase().collection('series').deleteOne(filter);
   }
 }

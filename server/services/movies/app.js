@@ -13,7 +13,7 @@ connect().then( async (db) => {
   console.log('mongo successfully connected', db)
 
   app.listen(port, () => {
-    console.log('run on port: ', port)
+    console.log('Movies run on port: ', port)
   })
 })
 
