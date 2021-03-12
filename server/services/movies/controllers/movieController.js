@@ -14,7 +14,7 @@ module.exports = class movieController {
   static async post (req, res) {
     try {
       const movies = await Movies.post(req.body)
-      res.status(200).json(movies)
+      res.status(201).json(movies.ops[0])
     } catch (err) {
       console.log(err)
     }
