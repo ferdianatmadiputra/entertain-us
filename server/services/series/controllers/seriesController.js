@@ -10,6 +10,16 @@ module.exports = class seriesController {
     }
   }
 
+  static async findById(req, res) {
+    try {
+      let id = req.params.id
+      const series = await Series.findById(id)
+      res.status(200).json(series)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   static async post (req, res) {
     try {
       const series = await Series.post(req.body)

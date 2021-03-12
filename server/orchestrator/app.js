@@ -1,4 +1,7 @@
 const { ApolloServer, gql, ApolloError } = require('apollo-server')
+const Redis = require('ioredis')
+const redis = new Redis()
+
 const moviesUrl = 'http://localhost:4001'
 const seriesUrl = 'http://localhost:4002'
 
@@ -51,6 +54,7 @@ const typeDefs = gql`
   }
   type Query {
     movies: [Movie]
+    movieById(input: ID!): Movie
     series: [Series]
   }
   type Mutation {
@@ -60,18 +64,34 @@ const typeDefs = gql`
     addSeries (input: SeriesInput): Series
   }
   `
-  // addMovies (title: String, overview: String, poster_path: String, popularity: Float, tags: [String]): Movie
-  // # addMovies (MovieInput): Movie
 
 const resolvers = {
   Query: {
     movies: async () => {
       try {
-        const { data } = await axios.get(moviesUrl)
-        console.log('ini dari service movies', data)
+        const cacheMovies = await redis.get('movies:data')
+        if (cacheMovies) {
+          return JSON.parse(cacheMovies)
+        } else {
+          const { data } = await axios.get(moviesUrl)
+          console.log('ini dari service movies', data)
+          redis.set('movies:data', JSON.stringify(data))
+          return data
+        }
+      } catch (err) {
+        console.log(err)
+        return new ApolloError(err)
+      }
+    },
+    movieById: async (parent, args, context, info) => {
+      console.log(args, 'ini args')
+      try {
+        const { data } = await axios.get(`${moviesUrl}/${args.input}`)
+        console.log('ini dari get movie by id', data)
         return data
       } catch (err) {
         console.log(err)
+        return new ApolloError(err)
       }
     },
     series: async () => {
@@ -80,7 +100,7 @@ const resolvers = {
         console.log('ini dari service series', data)
         return data
       } catch (err) {
-        console.log(err)
+        return new ApolloError(err)
       }
     },
   },
@@ -88,31 +108,31 @@ const resolvers = {
     addMovies: async (parent, args, context, info) => {
       console.log(args, 'ini args')
       try {
+        await redis.del('movies:data')
         const { data } = await axios.post(moviesUrl, args.input)
-        console.log('hasil post movies', data.ops[0])
-        return data.ops[0]
+        console.log('hasil post movies', data)
+        return data
       } catch (err) {
-        console.log(err)
-        return err.message
-        // return new ApolloError(err)
+        return new ApolloError(err)
       }
     },
     delMovies: async (parent, args, context, info) => {
       console.log(args, 'ini args')
       try {
+        await redis.del('movies:data')
         const { data } = await axios.delete(`${moviesUrl}/${args.input}`)
         console.log('hasil delete movies', data)
         return { msg: `success delete ${args.input}`}
       } catch (err) {
         console.log(err)
-        return err.message
-        // return new ApolloError(err)
+        return new ApolloError(err)
       }
     },
     updateMovies: async (parent, args, context, info) => {
       console.log(args, 'ini args')
-      const { _id, title, overview, poster_path, popularity, tags } = args.input
       try {
+        const { _id, title, overview, poster_path, popularity, tags } = args.input
+        await redis.del('movies:data')
         const { data } = await axios.put(`${moviesUrl}/${_id}`, {
           title, overview, poster_path, popularity, tags
         })
@@ -120,8 +140,7 @@ const resolvers = {
         return { updateCount: data }
       } catch (err) {
         console.log(err)
-        return err.message
-        // return new ApolloError(err)
+        return new ApolloError(err)
       }
     },
   }

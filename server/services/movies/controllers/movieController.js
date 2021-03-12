@@ -11,9 +11,21 @@ module.exports = class movieController {
     }
   }
 
+  static async findById(req, res) {
+    try {
+      let id = req.params.id
+      const movies = await Movies.findById(id)
+      console.log(movies)
+      res.status(200).json(movies)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   static async post (req, res) {
     try {
       const movies = await Movies.post(req.body)
+      console.log(movies)
       res.status(201).json(movies.ops[0])
     } catch (err) {
       console.log(err)

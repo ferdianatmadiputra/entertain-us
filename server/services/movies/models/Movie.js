@@ -5,6 +5,10 @@ module.exports = class Movies {
   static find() {
     return getDatabase().collection('movies').find().toArray()
   }
+  static findById(id) {
+    const filter = { _id: ObjectId(id) };
+    return getDatabase().collection('movies').findOne(filter)
+  }
   static post (movie) {
     return getDatabase().collection('movies').insertOne(movie)
   }
