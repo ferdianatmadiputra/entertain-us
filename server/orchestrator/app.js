@@ -5,14 +5,16 @@ const SeriesSchema = require('./schema/series')
 
 // url = 'http://localhost:4000'
 const typeDefs = gql`
-  type Query 
-  type Mutation
+    type Query 
+    type Mutation
   `
 
 const resolvers = {
 };
 
-const server = new ApolloServer({ typeDefs:[typeDefs, MovieSchema.typeDefs, SeriesSchema.typeDefs], resolvers: [resolvers, MovieSchema.resolvers, SeriesSchema.resolvers] });
+const server = new ApolloServer({ 
+  typeDefs:[typeDefs, MovieSchema.typeDefs, SeriesSchema.typeDefs], resolvers: [resolvers, MovieSchema.resolvers, SeriesSchema.resolvers]
+});
 
 server.listen().then(({ url }) => {
   console.log(`🚀  Apollo Server ready at ${url}`);

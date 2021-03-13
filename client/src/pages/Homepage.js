@@ -35,13 +35,14 @@ export default function Home () {
     })
   }
 
-  useEffect(() => {
-    dispatch(fetchSongs())
-  }, [dispatch])
+  // useEffect(() => {
+  //   dispatch(fetchSongs())
+  // }, [dispatch])
 
   return (
     <>
     <div>{JSON.stringify(data)}</div>
+    <button type="button" onClick={submitAddMovies}>SUBMIT</button>
     </>
   )
 }
