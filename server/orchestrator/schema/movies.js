@@ -28,11 +28,11 @@ module.exports = {
     }
 
     input MovieInput {
-      title: String
-      overview: String
-      poster_path: String
-      popularity: Float
-      tags: [String]
+      title: String!
+      overview: String!
+      poster_path: String!
+      popularity: Float!
+      tags: [String]!
     }
     input MovieUpdate {
       _id: ID!
