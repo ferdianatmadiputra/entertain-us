@@ -23,7 +23,7 @@ query {
 
 export const ADD_MOVIES = gql`
   mutation addMovies($input: MovieInput) {
-    addMovies (movies: $input) {
+    addMovies (input: $input) {
       _id,
       title,
       overview,

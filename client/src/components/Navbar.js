@@ -6,6 +6,10 @@ import { makeStyles } from '@material-ui/core/styles'
 import useScrollTrigger from '@material-ui/core/useScrollTrigger'
 import BookmarksIcon from '@material-ui/icons/Bookmarks'
 import AddToPhotosIcon from '@material-ui/icons/AddToPhotos';
+import TheatersIcon from '@material-ui/icons/Theaters'
+import PropTypes from 'prop-types';
+import CssBaseline from '@material-ui/core/CssBaseline';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,7 +22,8 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   header: {
-    color: "#000000"
+    color: "#e83b42",
+    backgroundColor: "#150C0Cad"
   },
   navItem: {
     textDecoration: 'none',
@@ -26,48 +31,75 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     flexWrap: 'wrap'
+  },
+  font: {
+    fontSize: 12
   }
 }));
 
-export default function Navbar () {
-  const classes = useStyles();
-  const trigger = useScrollTrigger()
+function HideOnScroll(props) {
+  const { children, window } = props;
+  // Note that you normally won't need to set the window ref as useScrollTrigger
+  // will default to window.
+  // This is only being set here because the demo is in an iframe.
+  const trigger = useScrollTrigger({ target: window ? window() : undefined });
+  
   return (
-  <Slide appear={false} direction="down" in={!trigger}>
-    <div className={classes.root}>
-      <AppBar position="static" color={classes.header}>
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
+}
+
+HideOnScroll.propTypes = {
+  children: PropTypes.element.isRequired,
+  /**
+   * Injected by the documentation to work in an iframe.
+   * You won't need it on your project.
+   */
+  window: PropTypes.func,
+};
+
+export default function HideAppBar(props) {
+  const classes = useStyles()
+  return (
+    <React.Fragment>
+      <CssBaseline />
+      <HideOnScroll {...props}>
+        <AppBar className={classes.header}>
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="default" aria-label="menu">
+          {/* <IconButton edge="start" className={classes.menuButton} color="default" aria-label="menu">
             <MenuIcon />
-          </IconButton>
+          </IconButton> */}
           <Typography variant="h6" className={classes.title}>
-            EntertainMe
+            <NavLink to="/"
+                className={classes.navItem}
+                activeStyle={{color: '#e83b42'}}
+              >
+                <TheatersIcon />
+                <span className={classes.font}>
+                &nbsp;ENTERTAIN US
+                </span>
+              </NavLink>
           </Typography>
+
           <Button color="inherit">
             <NavLink to="/fav"
               className={classes.navItem}
               activeStyle={{color: '#dd2c00'}}
             >
-              <BookmarksIcon />
-              <span>
-              &nbsp;Your Favorites
+              <span className={classes.font}>
+              Your Favorites
+              &nbsp;
               </span>
+              <BookmarksIcon />
             </NavLink>
           </Button>
-          <Button color="inherit">
-            <NavLink to="/add"
-                className={classes.navItem}
-                activeStyle={{color: '#dd2c00'}}
-              >
-                <AddToPhotosIcon />
-                <span>
-                &nbsp;Add Movie
-                </span>
-              </NavLink>
-          </Button>
+
         </Toolbar>
-      </AppBar>
-    </div>
-  </Slide>
-  )
+        </AppBar>
+      </HideOnScroll>
+      <Toolbar />
+    </React.Fragment>
+  );
 }
