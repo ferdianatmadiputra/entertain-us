@@ -3,9 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, Container, Paper } from '@material-ui/core'
 
 export default function FavoritePage () {
-  // const songs = useSelector((state) => state.songs.songs)
-  // const dispatch = useDispatch()
-  // const [localState, setLocalState] = useState('')
+
   const GET_MOVIES = gql`
   query {
     movies{
@@ -63,7 +61,6 @@ export default function FavoritePage () {
       ))
     }
     </Container>
-    <div>{JSON.stringify(data)}</div>
     <Button color="primary" onClick={submitAddMovies}>SUBMIT</Button>
     </>
   )

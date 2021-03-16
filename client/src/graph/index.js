@@ -46,3 +46,19 @@ export const GET_MOVIES = gql`
     }
   }
   `
+
+export const PUT_MOVIES = gql`
+  mutation updateMovies($input: MovieUpdate) {
+    updateMovies (input: $input) {
+      updateCount
+    }
+  }
+  `
+
+export const DEL_MOVIES = gql`
+  mutation delMovies($input: ID!) {
+    delMovies (input: $input) {
+      msg
+    }
+  } 
+  `

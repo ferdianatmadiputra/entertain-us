@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import { useQuery, gql, useMutation } from "@apollo/client";
-import { ADD_MOVIES, GET_MOVIES } from '../graph/index'
+import { ADD_MOVIES, GET_MOVIES, PUT_MOVIES } from '../graph/index'
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -37,22 +37,55 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default function FormDialog({open, close}) {
+export default function FormDialog({open, close, editData}) {
   const classes = useStyles();
   const [newTag, setNewTag] = useState('')
   const [ addMovie, { data: newMovieResult} ] = useMutation(ADD_MOVIES)
-  const [formData, setFormData] = useState({
+  const [ updateMovie, { data: updatedCount} ] = useMutation(PUT_MOVIES)
+  const [formData, setFormData] = useState(editData ? editData : {
     title: '',
     overview: '',
     poster_path: '',
     popularity: 0,
     tags: []})
 
+  useEffect (() => {
+    // console.log(editData, 'isi edit data')
+    if (editData) {
+      setFormData(editData)
+    } else if (open) {
+      setFormData({
+        title: '',
+        overview: '',
+        poster_path: '',
+        popularity: 0,
+        tags: []})
+    } 
+  }, [editData, open])
+
   const submitAddMovies = (e) => {
     e.preventDefault()
-    console.log(formData, 'ini dataform')
+    // console.log(formData, 'ini dataform')
     addMovie({
       variables: { input: formData },
+      refetchQueries: [{ query: GET_MOVIES }]
+    })
+    close()
+  }
+
+  const submitEditMovies = (e) => {
+    e.preventDefault()
+    // console.log(formData, 'ini dataform')
+    let updatedMovie = {
+      _id: formData._id,
+      title: formData.title,
+      overview: formData.overview,
+      poster_path: formData.poster_path,
+      popularity: formData.popularity,
+      tags: formData.tags
+    }
+    updateMovie({
+      variables: { input: updatedMovie },
       refetchQueries: [{ query: GET_MOVIES }]
     })
     close()
@@ -90,7 +123,8 @@ export default function FormDialog({open, close}) {
     <div>
       <Dialog
         className={classes.style}
-        open={open} onClose={close}
+        open={open}
+        onClose={close}
         PaperProps={{
           style: {
             backgroundColor: 'Black',
@@ -98,7 +132,10 @@ export default function FormDialog({open, close}) {
           },
         }}
       >
-        <DialogTitle id="form-dialog-title">Add Movie</DialogTitle>
+        <DialogTitle id="form-dialog-title">
+          {
+          editData? <span>Edit</span> : <span>Add</span> 
+          } Movie</DialogTitle>
         <DialogContent>
           <TextField label="Title"
             color="secondary"
@@ -113,7 +150,7 @@ export default function FormDialog({open, close}) {
             color="secondary"
             size="small"
             style={{ margin: 8 }}
-            defaultValue={formData.title}
+            defaultValue={formData.overview}
             onChange={(e) => onChangeInput(e, "overview")}
             fullWidth variant="outlined" required 
             autoComplete="off"/>
@@ -122,7 +159,7 @@ export default function FormDialog({open, close}) {
             color="secondary"
             size="small"
             style={{ margin: 8 }}
-            defaultValue={formData.title}
+            defaultValue={formData.poster_path}
             onChange={(e) => onChangeInput(e, "poster_path")}
             fullWidth variant="outlined" required 
             autoComplete="off"/>
@@ -173,7 +210,7 @@ export default function FormDialog({open, close}) {
           style={{ margin: 8 }}
           variant="contained"
           color="secondary"
-          onClick={submitAddMovies}
+          onClick={editData? submitEditMovies : submitAddMovies}
           startIcon={<PublishIcon />}
         >SUBMIT</Button>
         <Button

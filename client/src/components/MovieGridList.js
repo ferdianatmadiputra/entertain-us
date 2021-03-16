@@ -15,6 +15,9 @@ import Snackbar from '@material-ui/core/Snackbar';
 import Box from '@material-ui/core/Box';
 import CloseIcon from '@material-ui/icons/Close'
 import ModalForm from '../components/ModalForm'
+import { useQuery, gql, useMutation } from "@apollo/client";
+import { DEL_MOVIES, GET_MOVIES } from '../graph/index'
+import ModalDelete from './ModalDelete'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,51 +62,86 @@ const useStyles = makeStyles((theme) => ({
       cursor: "pointer"
     },
     width: 300,
-    backgroundColor: "#000000"
+    backgroundColor: "#150C0C"
   },
   detail: {
     padding: 10,
-    backgroundColor: "#000000"
+    backgroundColor: "#150C0C"
   }
 }));
 
 export default function SingleLineGridList(props) {
   const classes = useStyles();
   let data = props.data.slice().reverse()
-  const [openDetail, setOpenDetail] = React.useState({open: false, id: ''});
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarMsg, setSnackbarMsg] = React.useState('')
+  const [openDetail, setOpenDetail] = React.useState({open: false, id: ''});
   const [openModalEdit, setOpenModalEdit] = React.useState(false);
+  const [editData, setEditData] = React.useState(false);
+  const [ delMovie, { data: newMovieResult} ] = useMutation(DEL_MOVIES)
+  const [delData, setDelData] = React.useState({ _id: '' });
+  const [openModalDelete, setOpenModalDelete] = React.useState(false);
 
-  const handleClick = () => {
-    setOpenSnackbar(true);
-    // nanti dipakai untuk bookmarknya
-  };
-  const handleClose = (event, reason) => {
+
+  ///////// SNACKBAR HANDLER
+  const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
     setOpenSnackbar(false);
   };
 
+  ////////// DETAIL CARD
   const toggleDetail = (idDetail) => {
     setOpenDetail({ open: !openDetail.open, id: idDetail})
   }
+
+  //////// EDIT HANDLER
   const onClickEdit = (movie) => {
+    setEditData(movie)
     setOpenModalEdit(true)
   }
-
-  const onClickDelete = () => {
-
-  }
-
-
+  
   const handleCloseEdit = () => {
     setOpenModalEdit(false);
   };
 
+  ///////// DELETE HANDLER
+  const onClickDelete = (movieToDel) => {
+    setDelData(movieToDel)
+    setOpenModalDelete(true)
+  }
+  const confirmDelete = () => {
+    delMovie({
+      variables: { input: delData._id },
+      refetchQueries: [{ query: GET_MOVIES }]
+    })
+    setOpenModalDelete(false)
+    setSnackbarMsg(`${delData.title} deleted successfully`)
+    setOpenSnackbar(true);
+  }
+  const handleCloseDelete = () => {
+    setOpenModalDelete(false);
+  };
+
+  ///////// BOOKMARK HANDLER
+  const handleBookmark = () => {
+
+  }
+
   return (
     <div className={classes.root}>
-      <ModalForm open={openModalEdit} close={handleCloseEdit} />
+      <ModalDelete
+        open={openModalDelete}
+        close={handleCloseDelete}
+        delData={editData}
+        confirmDelete={confirmDelete}
+      />
+      <ModalForm
+        open={openModalEdit}
+        close={handleCloseEdit}
+        editData={editData}
+      />
       <GridList cellHeight={450} className={classes.gridList}
       cols={0}>
         {data.map((movie) => (
@@ -111,12 +149,11 @@ export default function SingleLineGridList(props) {
           ? 
             <GridListTile key={movie._id} className={classes.tile}
               onClick={() => toggleDetail(movie._id)}>
-              {/* <img src={movie.poster_path} alt={movie.title} /> */}
               <Box className={classes.detail}>
-                <Typography>{movie.title}</Typography>
-                <Typography>{movie.overview}</Typography>
+                <Typography variant="h6" paragraph={true}>{movie.title}</Typography>
+                <Typography variant="caption" paragraph={true}>{movie.overview}</Typography>
                 <br />
-                <Typography>Tags: {movie.tags.join(', ')}</Typography>
+                <Typography variant="subtitle1">Tags: {movie.tags.join(', ')}</Typography>
               </Box>
               <GridListTileBar
                 
@@ -127,11 +164,11 @@ export default function SingleLineGridList(props) {
                 actionIcon={
                   <>
                   <IconButton aria-label={`favorite ${movie.title}`}
-                  onClick={onClickEdit}>
+                  onClick={() => onClickEdit(movie)}>
                     <EditIcon className={classes.title} />
                   </IconButton>
                   <IconButton aria-label={`favorite ${movie.title}`}
-                  onClick={onClickDelete}>
+                  onClick={() => onClickDelete(movie)}>
                     <DeleteForeverIcon className={classes.title} />
                   </IconButton>
                   </>
@@ -155,7 +192,6 @@ export default function SingleLineGridList(props) {
                     size="small"
                     />
                 </Typography>
-                {/* <Typography>{movie.overview}</Typography> */}
                 </>
               }
               classes={{
@@ -164,7 +200,7 @@ export default function SingleLineGridList(props) {
               }}
               actionIcon={
                 <IconButton aria-label={`favorite ${movie.title}`}
-                onClick={handleClick}>
+                onClick={handleBookmark}>
                   <TurnedInNotIcon className={classes.title} />
                 </IconButton>
               }
@@ -175,18 +211,21 @@ export default function SingleLineGridList(props) {
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'right',
+        }}
+        ContentProps={{
+          style: {
+            backgroundColor: '#150C0C',
+            color:'#e83b42'
+          },
         }}
         open={openSnackbar}
         autoHideDuration={3000}
-        onClose={handleClose}
-        message="Added to your favorite"
+        onClose={handleCloseSnackbar}
+        message={snackbarMsg}
         action={
           <React.Fragment>
-            {/* <Button color="secondary" size="small" onClick={handleClose}>
-              UNDO
-            </Button> */}
-            <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </React.Fragment>

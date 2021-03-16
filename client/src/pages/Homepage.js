@@ -69,18 +69,13 @@ export default function Home () {
 
       <MovieGridList display="flex" data={data.movies} />
 
-      <Typography variant="h5" className={classes.title} component="h2">
-        SERIES
-      </Typography>
+      <div className={classes.gridContainer}>
+        <Typography variant="h5" className={classes.title} component="h2">
+          SERIES
+        </Typography>
+        <></>
+      </div>
       <MovieGridList display="flex" data={data.series} />
-
-      {/* <Box display="flex" flexDirection="row" p={1} >
-      {
-        data.series.map(datum => (
-          <CardFilm key={datum._id} datum={datum} />
-        ))
-      }
-      </Box> */}
     </>
   )
 }
