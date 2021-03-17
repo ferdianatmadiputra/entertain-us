@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useReactiveVar, useQuery } from '@apollo/client'
 import { favoritesVar } from '../graph/vars'
 import { GET_FAVORITES } from '../graph/index'
+import Preload from '../components/Preload';
 
 const useStyles = makeStyles(() => ({
   title: {
@@ -18,7 +19,7 @@ export default function FavoritePage () {
   // const favorites = useReactiveVar(favoritesVar)
 
   if (loading){
-    return <p>Loading....</p>
+    return <Preload/>
   }
   if (error) {
     return <p>Error {error.message}</p>

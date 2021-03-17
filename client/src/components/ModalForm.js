@@ -42,6 +42,7 @@ export default function FormDialog({open, close, editData}) {
   const [newTag, setNewTag] = useState('')
   const [ addMovie, { data: newMovieResult} ] = useMutation(ADD_MOVIES)
   const [ updateMovie, { data: updatedCount} ] = useMutation(PUT_MOVIES)
+  const [toggleError, setToggleError] = useState(false)
   const [formData, setFormData] = useState(editData ? editData : {
     title: '',
     overview: '',
@@ -65,30 +66,42 @@ export default function FormDialog({open, close, editData}) {
 
   const submitAddMovies = (e) => {
     e.preventDefault()
-    // console.log(formData, 'ini dataform')
-    addMovie({
-      variables: { input: formData },
-      refetchQueries: [{ query: GET_MOVIES }]
-    })
-    close()
+    if (formData.title && formData.overview && formData.poster_path
+      && formData.popularity >= 0 && formData.popularity <= 10 && formData.tags.length > 0) {
+      // console.log(formData, 'ini dataform')
+      addMovie({
+        variables: { input: formData },
+        refetchQueries: [{ query: GET_MOVIES }]
+      })
+      setToggleError(false)
+      close()
+    } else {
+      setToggleError(true)
+    }
   }
 
   const submitEditMovies = (e) => {
     e.preventDefault()
-    // console.log(formData, 'ini dataform')
-    let updatedMovie = {
-      _id: formData._id,
-      title: formData.title,
-      overview: formData.overview,
-      poster_path: formData.poster_path,
-      popularity: formData.popularity,
-      tags: formData.tags
+    if (formData._id && formData.title && formData.overview && formData.poster_path
+      && formData.popularity >= 0 && formData.popularity <= 10 && formData.tags.length > 0) {
+      // console.log(formData, 'ini dataform')
+      let updatedMovie = {
+        _id: formData._id,
+        title: formData.title,
+        overview: formData.overview,
+        poster_path: formData.poster_path,
+        popularity: formData.popularity,
+        tags: formData.tags
+      }
+      updateMovie({
+        variables: { input: updatedMovie },
+        refetchQueries: [{ query: GET_MOVIES }]
+      })
+      setToggleError(false)
+      close()
+    } else {
+      setToggleError(true)
     }
-    updateMovie({
-      variables: { input: updatedMovie },
-      refetchQueries: [{ query: GET_MOVIES }]
-    })
-    close()
   }
 
   function onChangeNewTag (e) {
@@ -140,6 +153,8 @@ export default function FormDialog({open, close, editData}) {
           <TextField label="Title"
             color="secondary"
             size="small"
+            error={toggleError}
+            helperText="title cannot be empty"
             style={{ margin: 8 }}
             defaultValue={formData.title}
             onChange={(e) => onChangeInput(e, "title")}
@@ -150,6 +165,8 @@ export default function FormDialog({open, close, editData}) {
             color="secondary"
             size="small"
             style={{ margin: 8 }}
+            error={toggleError}
+            helperText="overview cannot be empty"
             defaultValue={formData.overview}
             onChange={(e) => onChangeInput(e, "overview")}
             fullWidth variant="outlined" required 
@@ -159,6 +176,8 @@ export default function FormDialog({open, close, editData}) {
             color="secondary"
             size="small"
             style={{ margin: 8 }}
+            error={toggleError}
+            helperText="Poster url cannot be empty"
             defaultValue={formData.poster_path}
             onChange={(e) => onChangeInput(e, "poster_path")}
             fullWidth variant="outlined" required 
@@ -168,6 +187,8 @@ export default function FormDialog({open, close, editData}) {
             color="secondary"
             size="small"
             style={{ margin: 8 }}
+            error={toggleError}
+            helperText="Input popularity between 0 - 10"
             defaultValue={formData.popularity}
             onChange={(e) => onChangeInput(e, "popularity")}
             fullWidth variant="outlined" required 
@@ -179,6 +200,8 @@ export default function FormDialog({open, close, editData}) {
             size="small"
             defaultValue=''
             onChange={onChangeNewTag}
+            error={toggleError}
+            helperText="Input at least 1 tag"
             variant="outlined" required 
             autoComplete="off"/>
             <Button
@@ -223,6 +246,7 @@ export default function FormDialog({open, close, editData}) {
         >CANCEL</Button>
         </DialogActions>
       </Dialog>
+
     </div>
   );
 }
