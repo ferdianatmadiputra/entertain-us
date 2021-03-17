@@ -32,7 +32,7 @@ export const ADD_MOVIES = gql`
       tags
     }
   }
-  `
+`
   
 export const GET_MOVIES = gql`
   query {
@@ -45,7 +45,7 @@ export const GET_MOVIES = gql`
       tags
     }
   }
-  `
+`
 
 export const PUT_MOVIES = gql`
   mutation updateMovies($input: MovieUpdate) {
@@ -53,7 +53,7 @@ export const PUT_MOVIES = gql`
       updateCount
     }
   }
-  `
+`
 
 export const DEL_MOVIES = gql`
   mutation delMovies($input: ID!) {
@@ -61,4 +61,10 @@ export const DEL_MOVIES = gql`
       msg
     }
   } 
-  `
+`
+
+export const GET_FAVORITES = gql`
+  query getFavorites {
+    favorites @client
+  }
+`

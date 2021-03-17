@@ -5,6 +5,8 @@ import { useHistory } from 'react-router-dom'
 import { GET_ALL } from '../graph/index'
 import { makeStyles } from '@material-ui/core/styles';
 import MovieGridList from '../components/MovieGridList'
+import CardSeries from '../components/CardSeries'
+import Preload from '../components/Preload'
 import ModalForm from '../components/ModalForm'
 import AddBoxIcon from '@material-ui/icons/AddBox'
 
@@ -48,10 +50,7 @@ export default function Home () {
   };
 
   if (loading){
-    return (
-      <Box display='flex' flex='1' justifyContent='space-around'>
-      <CircularProgress size={100} />
-      </Box>)
+    return <Preload />
   } else if (error) {
     return <p>error...</p>
   }
@@ -67,7 +66,7 @@ export default function Home () {
         </Button>
       </div>
 
-      <MovieGridList display="flex" data={data.movies} />
+      <MovieGridList display="flex" data={data.movies} type="movie" />
 
       <div className={classes.gridContainer}>
         <Typography variant="h5" className={classes.title} component="h2">
@@ -75,7 +74,14 @@ export default function Home () {
         </Typography>
         <></>
       </div>
-      <MovieGridList display="flex" data={data.series} />
+      {/* <Box display="flex" flexDirection="row" p={1} >
+      {
+        data.series.map(datum => (
+          <CardSeries key={datum._id} datum={datum} />
+        ))
+      }
+      </Box> */}
+      <MovieGridList display="flex" data={data.series} type="series"/>
     </>
   )
 }

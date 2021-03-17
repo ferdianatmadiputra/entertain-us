@@ -17,8 +17,9 @@ import CloseIcon from '@material-ui/icons/Close'
 
 const useStyles = makeStyles({
   root: {
-    width: 380,
+    width: 300,
     flexWrap: 'nowrap',
+    backgroundColor: "#150C0C",
     // width: 100%,
     // objectFit: "contain",
     marginRight: 0,
@@ -31,9 +32,16 @@ const useStyles = makeStyles({
   media: {
     height: 400,
   },
+  spacearound: {
+    display: 'flex',
+    flexWrap: 'no-wrap',
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+
+  }
 });
 
-export default function CardFilm (props) {
+export default function CardSeries (props) {
   const history = useHistory()
   let datum = props.datum
   const classes = useStyles()
@@ -70,16 +78,20 @@ export default function CardFilm (props) {
         </Typography>
 
     <CardActions>
-      <Typography>{datum.popularity}</Typography>
-      <Rating name="read-only" 
-        precision={0.1}
-        value={datum.popularity / 2}
-        readOnly
-        size="small"
-        />
-      <Button size="small" onClick={goToEdit}>
-        Edit
-      </Button>
+      <div className={classes.spacearound}>
+        <div>
+          <span>{datum.popularity}</span>
+          <Rating name="read-only" 
+            precision={0.1}
+            value={datum.popularity / 2}
+            readOnly
+            size="small"
+            />
+        </div>
+        <Button size="small" onClick={goToEdit}>
+          Edit
+        </Button>
+      </div>
     </CardActions>
       </CardContent>
       </CardActionArea>

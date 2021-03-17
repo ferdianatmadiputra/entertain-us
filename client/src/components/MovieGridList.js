@@ -16,8 +16,10 @@ import Box from '@material-ui/core/Box';
 import CloseIcon from '@material-ui/icons/Close'
 import ModalForm from '../components/ModalForm'
 import { useQuery, gql, useMutation } from "@apollo/client";
-import { DEL_MOVIES, GET_MOVIES } from '../graph/index'
+import { DEL_MOVIES, GET_MOVIES, GET_FAVORITES } from '../graph/index'
 import ModalDelete from './ModalDelete'
+import { useReactiveVar } from '@apollo/client'
+import { favoritesVar } from '../graph/vars'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
   },
   gridList: {
     flexWrap: 'nowrap',
-    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
     transform: 'translateZ(0)',
     overflowX: "scroll",
     overflowY: "hidden",
@@ -37,7 +38,6 @@ const useStyles = makeStyles((theme) => ({
     padding: 10,
     "&::-webkit-scrollbar": {
       width: 5,
-      // display: 'none'
     },
     "&::-webkit-scrollbar-track": {
       boxShadow: "inset 0 0 6px rgba(0, 0, 0, 0.3)",
@@ -48,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
+    zIndex: 200,
     color: "#ffffff",
   },
   titleBar: {
@@ -72,17 +73,26 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SingleLineGridList(props) {
   const classes = useStyles();
-  let data = props.data.slice().reverse()
+  let movies = props.data.slice().reverse()
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState('')
   const [openDetail, setOpenDetail] = React.useState({open: false, id: ''});
   const [openModalEdit, setOpenModalEdit] = React.useState(false);
   const [editData, setEditData] = React.useState(false);
-  const [ delMovie, { data: newMovieResult} ] = useMutation(DEL_MOVIES)
+  const [ delMovie, { data: delResult} ] = useMutation(DEL_MOVIES)
   const [delData, setDelData] = React.useState({ _id: '' });
   const [openModalDelete, setOpenModalDelete] = React.useState(false);
+  const {data, loading, error } = useQuery(GET_FAVORITES)
+  const backUpImage = 'https://image.tmdb.org/t/p/w500/5lqJx0uNKrD1cEKgaqF1LBsLAoi.jpg'
+  if (loading) {
+    return <p>Loading...</p>
+  }
+  if (error) {
+    return <p>Error {error.message}</p>
+  }
 
-
+  console.log(data, 'ini isi data fav')
+  const { favorites } = data
   ///////// SNACKBAR HANDLER
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -125,8 +135,18 @@ export default function SingleLineGridList(props) {
   };
 
   ///////// BOOKMARK HANDLER
-  const handleBookmark = () => {
-
+  const handleBookmark = (movie) => {
+    let isFav = favorites.find((el) => el._id === movie._id)
+    console.log(isFav, 'isi isFav')
+    if (isFav) {
+      favoritesVar(favorites.filter(el => el._id !== movie._id))
+      setSnackbarMsg(`${movie.title} removed from your favorites`)
+      setOpenSnackbar(true);
+    } else {
+      favoritesVar([...favorites, movie])
+      setSnackbarMsg(`${movie.title} added to your favorites`)
+      setOpenSnackbar(true);
+    }
   }
 
   return (
@@ -144,7 +164,7 @@ export default function SingleLineGridList(props) {
       />
       <GridList cellHeight={450} className={classes.gridList}
       cols={0}>
-        {data.map((movie) => (
+        {movies.map((movie) => (
           openDetail.open && openDetail.id === movie._id
           ? 
             <GridListTile key={movie._id} className={classes.tile}
@@ -156,12 +176,14 @@ export default function SingleLineGridList(props) {
                 <Typography variant="subtitle1">Tags: {movie.tags.join(', ')}</Typography>
               </Box>
               <GridListTileBar
-                
                 classes={{
                   root: classes.titleBar,
                   title: classes.title,
                 }}
                 actionIcon={
+                  props.type === "series"
+                  ? <></>
+                  :
                   <>
                   <IconButton aria-label={`favorite ${movie.title}`}
                   onClick={() => onClickEdit(movie)}>
@@ -177,9 +199,14 @@ export default function SingleLineGridList(props) {
 
             </GridListTile>
           :
-          <GridListTile key={movie._id} className={classes.tile}
-            onClick={() => toggleDetail(movie._id)}>
-            <img src={movie.poster_path} alt={movie.title} />
+          <GridListTile key={movie._id} className={classes.tile}>
+            <img
+            src={movie.poster_path}
+            onError={(e)=>{ if (e.target.src !== backUpImage) { e.target.onerror = null; e.target.src=backUpImage; } }}
+            alt={movie.title}
+            onClick={() => toggleDetail(movie._id)}
+            
+            />
             <GridListTileBar
               title={movie.title}
               subtitle={
@@ -193,21 +220,32 @@ export default function SingleLineGridList(props) {
                     />
                 </Typography>
                 </>
-              }
+             }
               classes={{
                 root: classes.titleBar,
                 title: classes.title,
               }}
               actionIcon={
-                <IconButton aria-label={`favorite ${movie.title}`}
-                onClick={handleBookmark}>
-                  <TurnedInNotIcon className={classes.title} />
-                </IconButton>
+                props.type === "series"
+                  ? <></>
+                  :
+                (favorites.find((el) => el._id === movie._id)
+                  ?
+                  <IconButton aria-label={`favorite ${movie.title}`}
+                  onClick={() => handleBookmark(movie)}>
+                      <TurnedInIcon className={classes.title} />
+                  </IconButton>
+                  :
+                  <IconButton aria-label={`favorite ${movie.title}`}
+                  onClick={() => handleBookmark(movie)}>
+                      <TurnedInNotIcon className={classes.title} />
+                  </IconButton>)
               }
             />
           </GridListTile>
         ))}
       </GridList>
+
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',
