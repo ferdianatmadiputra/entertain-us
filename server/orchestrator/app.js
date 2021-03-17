@@ -3,7 +3,6 @@ const { ApolloServer, gql } = require('apollo-server')
 const MovieSchema = require('./schema/movies')
 const SeriesSchema = require('./schema/series')
 
-// url = 'http://localhost:4000'
 const typeDefs = gql`
     type Query 
     type Mutation
