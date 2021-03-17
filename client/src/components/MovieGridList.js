@@ -220,7 +220,7 @@ export default function SingleLineGridList(props) {
                     />
                 </Typography>
                 </>
-             }
+              }
               classes={{
                 root: classes.titleBar,
                 title: classes.title,

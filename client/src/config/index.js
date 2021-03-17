@@ -16,7 +16,8 @@ export const cache = new InMemoryCache({
 })
 
 const client = new ApolloClient({
-  uri: 'https://54.179.180.114:4000',
+  uri: 'http://54.179.180.114:4000',
+  // uri: 'http://localhost:3000',
   cache
 });
 export default client
